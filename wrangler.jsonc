@@ -14,6 +14,11 @@
 	"kv_namespaces": [
     ],
 	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "template-db",
+			"database_id": "f1d987f7-4cd1-4c07-922c-ff69be0411de"
+		}
 	],
 
 	/**
@@ -28,15 +33,13 @@
 	},
 	"vars": {
 		"NODE_ENV": "development",
-		"DOMAIN": "drerings.app",
-		"BSKY_SERVICE": "https://bsky.social",
-		"BSKY_HANDLE": "drerings.app",
-		"BSKY_DID": "did:plc:yjjek6fqjmtonycziwnoateb",
-		"WEB_DID": "did:web:drerings.app",
-		"RECORD_NAME": "drerings",
 		"SESSION_SECRET": "development-secret-key-change-in-production-32chars"
 	},
 	"migrations": [
+		{
+			"tag": "v1",
+			"new_classes": [ "MyDurableObject" ]
+		}
 	],
 	"durable_objects": {
 		"bindings": [

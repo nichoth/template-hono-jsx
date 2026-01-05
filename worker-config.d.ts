@@ -8,7 +8,7 @@ declare namespace Cloudflare {
 	interface Env {
         DB:D1Database;
 		NODE_ENV:'development'|'production'|'staging';
-		SESSION_SECRET:"development-secret-key-change-in-production-32chars";
+		SESSION_SECRET:string;
 		MY_DO:DurableObjectNamespace<import("./src/server/index").MyDurableObject>;
 		ASSETS:Fetcher;
 	}
