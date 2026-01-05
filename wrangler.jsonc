@@ -5,7 +5,7 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "example-app",
-	"main": "durable_object/index.ts",  // hono entry
+	"main": "src/server/index.tsx",  // hono entry
 	// "placement": { "mode": "smart" },
 	"compatibility_date": "2025-12-17",
 	"compatibility_flags": [
@@ -37,18 +37,12 @@
 		"SESSION_SECRET": "development-secret-key-change-in-production-32chars"
 	},
 	"migrations": [
-		{
-			"tag": "v2-add-drerings",
-			"new_sqlite_classes": [
-				"DreringsDO"
-			]
-		}
 	],
 	"durable_objects": {
 		"bindings": [
 			{
-				"name": "DRERINGS_DO",
-				"class_name": "DreringsDO",
+				"name": "MY_DO",
+				"class_name": "MyDurableObject",
 			}
 		],
 	},

@@ -46,6 +46,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.17.1",
     "@cloudflare/workers-types": "^4.20260103.0",
     "@hono/vite-dev-server": "^0.24.0",
     "@substrate-system/debug": "^0.9.24",
