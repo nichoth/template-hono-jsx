@@ -3,7 +3,6 @@ import { defineConfig } from 'vite'
 import browserslist from 'browserslist'
 import { browserslistToTargets } from 'lightningcss'
 import { cloudflare } from '@cloudflare/vite-plugin'
-import devServer from '@hono/vite-dev-server'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -20,9 +19,6 @@ export default defineConfig(({ mode }) => {
         },
         plugins: [
             cloudflare(),
-            devServer({
-                entry: 'src/server/index.tsx'
-            })
         ],
         // https://github.com/vitejs/vite/issues/8644#issuecomment-1159308803
         esbuild: {
