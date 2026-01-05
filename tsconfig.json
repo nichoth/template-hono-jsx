@@ -6,10 +6,12 @@
     "moduleResolution": "Bundler",
     "esModuleInterop": false,
     "lib": ["ES2022", "DOM", "WebWorker"],
-    "types": ["vite/client"],
+    "types": ["vite/client", "@cloudflare/workers-types"],
     "allowJs": false,
     "skipLibCheck": true,
     "outDir": "dist",
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx",
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -24,8 +26,8 @@
     "declarationMap": true
   },
   "include": [
-    "example",
     "src/**/*",
+    "./worker-config.d.ts",
     "test",
     "lib.es5.d.ts"
   ]
