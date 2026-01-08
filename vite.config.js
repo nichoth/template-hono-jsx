@@ -2,11 +2,44 @@
 import { defineConfig } from 'vite'
 import browserslist from 'browserslist'
 import { browserslistToTargets } from 'lightningcss'
-import { cloudflare } from '@cloudflare/vite-plugin'
+import honox from 'honox/vite'
+import adapter from '@hono/vite-dev-server/cloudflare'
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
+    // Client build mode - builds islands for browser
+    if (mode === 'client') {
+        return {
+            build: {
+                rollupOptions: {
+                    input: ['./app/client.ts'],
+                    output: {
+                        entryFileNames: 'static/client.js',
+                    },
+                },
+                outDir: './dist',
+                manifest: true,
+                emptyOutDir: false,
+            },
+            resolve: {
+                alias: {
+                    '@substrate-system/debug': '@substrate-system/debug/noop'
+                }
+            },
+        }
+    }
+
+    // Server build mode (default)
     return {
+        plugins: [
+            honox({
+                devServer: {
+                    adapter,
+                },
+                client: {
+                    input: ['/app/client.ts'],
+                },
+            }),
+        ],
         define: {
             global: 'globalThis'
         },
@@ -17,10 +50,6 @@ export default defineConfig(({ mode }) => {
                     '@substrate-system/debug'
             }
         },
-        plugins: [
-            cloudflare(),
-        ],
-        // https://github.com/vitejs/vite/issues/8644#issuecomment-1159308803
         esbuild: {
             logOverride: { 'this-is-undefined-in-esm': 'silent' }
         },
@@ -40,9 +69,9 @@ export default defineConfig(({ mode }) => {
             cssMinify: 'lightningcss',
             target: 'esnext',
             minify: mode === 'production',
-            outDir: './public',
+            outDir: './dist',
             emptyOutDir: true,
-            sourcemap: 'inline'
-        }
+            sourcemap: mode !== 'production' ? 'inline' : false,
+        },
     }
 })
