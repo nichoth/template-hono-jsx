@@ -6,9 +6,6 @@ import { Hono, type Context } from 'hono'
 /**
  * A CF durable object.
  * https://developers.cloudflare.com/durable-objects
- *
- *   - handle oauth with Bluesky
- *   - 1 DO per user
  */
 export class MyDurableObject extends DurableObject<Env> {
     /**
@@ -39,7 +36,9 @@ export class MyDurableObject extends DurableObject<Env> {
         return 'abc123'
     }
 
-    async handleCallback (_params:Record<string, string>):Promise<{ did:string }> {
+    async handleCallback (_params:Record<string, string>):Promise<{
+        did:string
+    }> {
         return { did: 'abc123' }
     }
 
