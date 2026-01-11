@@ -105,7 +105,7 @@ app.use('*', async (ctx, next) => {
  */
 app.get('/api/auth/status', async (ctx) => {
     const session = ctx.get('session')
-    const activeDoId = session.get('active_do_id') as string | undefined
+    const activeDoId = session.get('active_do_id') as string|undefined
 
     if (!activeDoId) {
         return ctx.json({

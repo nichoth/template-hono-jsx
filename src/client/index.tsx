@@ -42,7 +42,6 @@ export const App:FunctionComponent = function App () {
             <${Nav} route=${state.route.value} />
         </header>
         <main>
-
             <${ChildNode} state=${state} />
         </main>
     `
