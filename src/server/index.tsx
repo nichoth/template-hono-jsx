@@ -2,6 +2,9 @@ import { DurableObject } from 'cloudflare:workers'
 import { sessionMiddleware, CookieStore, type Session } from 'hono-sessions'
 import { cors } from 'hono/cors'
 import { Hono, type Context } from 'hono'
+import { renderToString } from 'hono/jsx/dom/server'
+import { App } from '../shared/App.js'
+import { createInitialState, serializeState } from '../shared/state.js'
 
 /**
  * A CF durable object.
@@ -369,23 +372,48 @@ app.get('/.well-known/did.json', async (ctx:Context) => {
     return ctx.json({})
 })
 
-// Catch-all: serve static assets or index.html for SPA routes
+// Catch-all: serve static assets or SSR for page routes
 app.all('*', async (ctx) => {
     const url = new URL(ctx.req.url)
+    const pathname = url.pathname
 
-    // Try to serve the exact asset first
-    try {
-        const response = await ctx.env.ASSETS.fetch(ctx.req.raw)
-        if (response.status !== 404) {
-            return response
+    // Try to serve static assets first (files with extensions)
+    if (pathname.includes('.')) {
+        try {
+            const response = await ctx.env.ASSETS.fetch(ctx.req.raw)
+            if (response.status !== 404) {
+                return response
+            }
+        } catch {
+            // Asset not found, fall through
         }
-    } catch {
-        // Asset not found, fall through to SPA
     }
 
-    // For SPA routes, serve index.html
-    const indexUrl = new URL('/index.html', url.origin)
-    return ctx.env.ASSETS.fetch(new Request(indexUrl))
+    // SSR: Render the app for page routes
+    const route = pathname + url.search
+    const initialState = createInitialState(route, 0)
+
+    // Render the App component to HTML string
+    const appHtml = renderToString(<App state={initialState} />)
+    const stateJson = serializeState(initialState)
+
+    // Build the full HTML page
+    const html = `<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>App</title>
+    <link rel="stylesheet" href="/src/client/style.css">
+</head>
+<body>
+    <div id="root">${appHtml}</div>
+    <script id="__INITIAL_STATE__" type="application/json">${stateJson}</script>
+    <script type="module" src="/src/client/index.tsx"></script>
+</body>
+</html>`
+
+    return ctx.html(html)
 })
 
 export default app

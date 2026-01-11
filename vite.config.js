@@ -23,8 +23,8 @@ export default defineConfig(({ mode }) => {
         },
         esbuild: {
             logOverride: { 'this-is-undefined-in-esm': 'silent' },
-            jsxFactory: 'h',
-            jsxFragment: 'Fragment',
+            jsx: 'automatic',
+            jsxImportSource: 'hono/jsx',
         },
         publicDir: '_public',
         css: {
