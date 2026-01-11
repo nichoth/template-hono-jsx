@@ -40,10 +40,14 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@preact/signals": "^2.5.1",
     "@substrate-system/css-normalize": "^0.0.13",
+    "@substrate-system/routes": "^5.0.5",
     "hono": "^4.11.3",
     "hono-sessions": "^0.8.0",
     "honox": "^0.1.53",
+    "preact": "^10.28.2",
+    "route-event": "^7.4.0",
     "zod": "^4.3.5"
   },
   "devDependencies": {

@@ -1,6 +1,99 @@
 @import url("../../node_modules/@substrate-system/css-normalize/dist/index.min.css");
 
+:root {
+    --focus-color: #00c8ff;
+    --middle-gray: #d3d3d363;
+}
+
 body {
-    margin: 1rem;
+    margin: 0;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid;
+    padding: 1rem;
+
+    & h1 {
+        font-size: 1.2rem;
+    }
+}
+
+.route {
+    margin-top: 2rem;
+    padding: 0 1rem;
+}
+
+main {
+    max-width: 40rem;
+    margin: 0 auto;
+}
+
+h2 {
+    margin-bottom: 1rem;
+}
+
+hr {
+    margin: 1rem 0;
+}
+
+nav {
+    & li {
+        & a {
+            transition: all 0.2s;
+            text-decoration-style: solid;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 1px;
+        }
+
+        &.active {
+            & a {
+                text-decoration-thickness: 2px;
+                text-underline-offset: 3px;
+                text-decoration-style: solid;
+            }
+        }
+    }
+
+    & ul {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        gap: 1rem;
+    }
+}
+
+.controls {
+    text-align: right;
+}
+
+#root {
+    margin: 0 auto;
+}
+
+.count-controls {
+    list-style: none;
+    padding: 0;
+
+    & li {
+        margin-bottom: 1rem;
+    }
+}
+
+button {
+    cursor: pointer;
+    border-radius: 0;
+}
+
+pre {
+    padding: 2rem;
+    background-color: var(--middle-gray);
+}
+
+.not-found {
+    text-align: center;
+    margin-top: 4rem;
 }

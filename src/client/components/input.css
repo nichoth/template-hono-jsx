@@ -1,0 +1,21 @@
+div.input {
+    margin-bottom: 1rem;
+
+    & label {
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    & input {
+        transition: all 0.2s;
+        outline: 1px solid transparent;
+        border: 1px solid;
+        padding: 0.5rem;
+        width: 100%;
+
+        &:focus {
+            border-color: var(--focus-color);
+            outline-color: var(--focus-color);
+        }
+    }
+}
