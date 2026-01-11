@@ -39,7 +39,7 @@ export const App:FunctionComponent = function App () {
     return html`
         <header>
             <h1>Example</h1>
-            <${Nav} route=${state.route.value} />
+            <${Nav} route=${state.route.value} state=${state} />
         </header>
         <main>
             <${ChildNode} state=${state} />

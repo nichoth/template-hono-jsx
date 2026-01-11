@@ -1,16 +1,18 @@
 import { type Signal, signal } from '@preact/signals'
 import Route from 'route-event'
 
+export type AppState = ReturnType<typeof State>
+
 /**
  * Setup application state
  *   - routes
  *   - counter
  */
-export function State (): {
-    route: Signal<string>;
-    count: Signal<number>;
-    _setRoute: (path: string) => void;
-} {
+export function State ():{
+    route:Signal<string>;
+    count:Signal<number>;
+    _setRoute:(path:string)=>void;
+} {  // eslint-disable-line indent
     const onRoute = Route()
 
     const state = {
