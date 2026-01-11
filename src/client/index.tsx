@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'hono/jsx'
+import { useEffect } from 'hono/jsx'
 import { render } from 'hono/jsx/dom'
 import Debug from '@substrate-system/debug'
 import Route from 'route-event'
+import { signal } from '@preact/signals'
 import { App } from '../shared/App.js'
-import type { AppState } from '../shared/state.js'
+import type { AppState, SerializedState } from '../shared/state.js'
 import { deserializeState } from '../shared/state.js'
 import './style.css'
 
@@ -17,22 +18,28 @@ if (import.meta.env.DEV) {
     localStorage.removeItem('debug')
 }
 
+// Get initial state from server-rendered data
+const initialData = getInitialState()
+
+// Create signals for reactive state
+const route = signal(initialData.route)
+const count = signal(initialData.count)
+
+const state: AppState = {
+    route,
+    count,
+}
+
 /**
  * Client-side wrapper that manages reactive state
  */
 function ClientApp () {
-    // Get initial state from server-rendered data
-    const initialData = getInitialState()
-
-    const [route, setRoute] = useState(initialData.route)
-    const [count, setCount] = useState(initialData.count)
-
     // Set up client-side routing
     useEffect(() => {
         const onRoute = Route()
 
         onRoute((path: string, data: { popstate?: boolean; scrollX: number; scrollY: number }) => {
-            setRoute(path)
+            route.value = path
             // Handle scroll state like a web browser
             if (data.popstate) {
                 window.scrollTo(data.scrollX, data.scrollY)
@@ -41,17 +48,6 @@ function ClientApp () {
             }
         })
     }, [])
-
-    const state: AppState = {
-        route,
-        count,
-        setRoute: (path: string) => {
-            // Use route-event for navigation
-            const onRoute = Route()
-            onRoute.setRoute(path)
-        },
-        setCount,
-    }
 
     debug('rendering app...', state)
 
@@ -64,7 +60,7 @@ function ClientApp () {
 /**
  * Get initial state from server-rendered script tag
  */
-function getInitialState (): { route: string; count: number } {
+function getInitialState (): SerializedState {
     const el = document.getElementById('__INITIAL_STATE__')
     if (el?.textContent) {
         try {

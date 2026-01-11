@@ -1,5 +1,5 @@
 import type { FC, PropsWithChildren } from 'hono/jsx'
-import { useState, useCallback } from 'hono/jsx'
+import { useSignal } from '@preact/signals'
 import './button.css'
 
 interface ButtonProps {
@@ -11,8 +11,8 @@ interface ButtonProps {
 }
 
 export const Button: FC<PropsWithChildren<ButtonProps>> = function (props) {
-    const [localSpinning, setLocalSpinning] = useState(false)
-    const isSpinning = props.isSpinning ?? localSpinning
+    const localSpinning = useSignal(false)
+    const isSpinning = props.isSpinning ?? localSpinning.value
 
     const classes = (Array.from(new Set([
         'btn',
@@ -20,13 +20,13 @@ export const Button: FC<PropsWithChildren<ButtonProps>> = function (props) {
         isSpinning ? 'spinning' : ''
     ]))).filter(Boolean).join(' ').trim()
 
-    const click = useCallback(async (ev: MouseEvent) => {
+    const click = async (ev: MouseEvent) => {
         if (props.onClick) {
-            setLocalSpinning(true)
+            localSpinning.value = true
             await props.onClick(ev)
-            setLocalSpinning(false)
+            localSpinning.value = false
         }
-    }, [props.onClick])
+    }
 
     return (
         <button

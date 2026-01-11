@@ -1,5 +1,4 @@
 import type { FC } from 'hono/jsx'
-import { useCallback } from 'hono/jsx'
 import type { AppState } from '../state.js'
 import { Button } from '../components/button.js'
 import './home.css'
@@ -9,15 +8,15 @@ interface HomeProps {
 }
 
 export const HomeRoute: FC<HomeProps> = function HomeRoute ({ state }) {
-    const plus = useCallback((ev: MouseEvent) => {
+    const plus = (ev: MouseEvent) => {
         ev.preventDefault()
-        state.setCount(state.count + 1)
-    }, [state])
+        state.count.value++
+    }
 
-    const minus = useCallback((ev: MouseEvent) => {
+    const minus = (ev: MouseEvent) => {
         ev.preventDefault()
-        state.setCount(state.count - 1)
-    }, [state])
+        state.count.value--
+    }
 
     return (
         <section class="route home">

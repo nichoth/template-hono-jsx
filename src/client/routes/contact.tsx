@@ -1,5 +1,5 @@
 import type { FC } from 'hono/jsx'
-import { useState, useCallback } from 'hono/jsx'
+import { useSignal } from '@preact/signals'
 import Debug from '@substrate-system/debug'
 import { Button } from '../components/button.js'
 import { Input } from '../components/input.js'
@@ -8,15 +8,15 @@ import './contact.css'
 const debug = Debug('example:view:contact')
 
 export const ContactRoute: FC = function ContactRoute () {
-    const [isResolving, setIsResolving] = useState(false)
+    const isResolving = useSignal(false)
 
-    const submit = useCallback(async (ev: SubmitEvent) => {
+    const submit = async (ev: SubmitEvent) => {
         ev.preventDefault()
         debug('submit', ev)
-        setIsResolving(true)
+        isResolving.value = true
         await sleep(3000)
-        setIsResolving(false)
-    }, [])
+        isResolving.value = false
+    }
 
     return (
         <div class="route contact">
@@ -24,7 +24,7 @@ export const ContactRoute: FC = function ContactRoute () {
 
             <form class="contact" onSubmit={submit}>
                 <Input
-                    disabled={isResolving}
+                    disabled={isResolving.value}
                     id="example"
                     name="example"
                     type="text"
@@ -33,7 +33,7 @@ export const ContactRoute: FC = function ContactRoute () {
 
                 <div class="controls">
                     <Button
-                        isSpinning={isResolving}
+                        isSpinning={isResolving.value}
                         class="btn"
                         type="submit"
                     >
