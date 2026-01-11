@@ -2,9 +2,6 @@ import { DurableObject } from 'cloudflare:workers'
 import { sessionMiddleware, CookieStore, type Session } from 'hono-sessions'
 import { cors } from 'hono/cors'
 import { Hono, type Context } from 'hono'
-import { Layout } from './components/layout.js'
-import { Messages } from './components/messages.js'
-// import type { ZodError } from 'zod'
 
 /**
  * A CF durable object.
@@ -14,14 +11,15 @@ import { Messages } from './components/messages.js'
  *   - 1 DO per user
  */
 export class MyDurableObject extends DurableObject<Env> {
-    // constructor (ctx:DurableObjectState, env:Env) {
-    //     super(ctx, env)
-    // }
-
     /**
      * Write a new post.
      */
-    async post (_text, _buffer, _mimeType, _alt) {
+    async post (
+        _text: string,
+        _buffer: ArrayBuffer,
+        _mimeType: string,
+        _alt: string
+    ) {
         // DID from `handleCallback` step
         const did = await this.ctx.storage.get<string>('user_did')
         if (!did) throw new Error('Unauthorized: No session in DO')
@@ -100,13 +98,6 @@ app.use('*', async (ctx, next) => {
 
     // execute middleware
     return sessionMw(ctx, next)
-})
-
-app.get('/', ctx => {
-    const messages = ['Good Morning', 'Good Evening', 'Good Night']
-    return ctx.html(<Layout>
-        <Messages messages={messages} />
-    </Layout>)
 })
 
 /**

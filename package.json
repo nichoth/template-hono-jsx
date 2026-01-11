@@ -40,6 +40,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@substrate-system/css-normalize": "^0.0.13",
     "hono": "^4.11.3",
     "hono-sessions": "^0.8.0",
     "honox": "^0.1.53",
@@ -47,6 +48,7 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.17.1",
+    "@cloudflare/workers-types": "^4.20260111.0",
     "@substrate-system/debug": "^0.9.24",
     "@substrate-system/tapout": "^0.0.33",
     "@substrate-system/tapzero": "^0.10.15",

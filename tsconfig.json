@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "listFiles": true,
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "module": "esnext",
     "target": "ES2022",
     "moduleResolution": "Bundler",
@@ -28,6 +27,7 @@
   },
   "include": [
     "src/**/*",
+    "app/**/*",
     "./worker-config.d.ts",
     "test",
     "lib.es5.d.ts"

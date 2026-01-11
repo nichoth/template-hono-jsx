@@ -8,6 +8,9 @@ if (import.meta.env.DEV) {
 
 const debug = Debug('example')
 
-export function example ():void {
-    debug('hello')
+debug('starting the app')
+
+const root = document.getElementById('root')
+if (root) {
+    root.innerHTML = '<h1>Hello World</h1>'
 }

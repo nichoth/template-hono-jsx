@@ -2,42 +2,13 @@
 import { defineConfig } from 'vite'
 import browserslist from 'browserslist'
 import { browserslistToTargets } from 'lightningcss'
-import honox from 'honox/vite'
-import adapter from '@hono/vite-dev-server/cloudflare'
+import { cloudflare } from '@cloudflare/vite-plugin'
 
 export default defineConfig(({ mode }) => {
-    // Client build mode - builds islands for browser
-    if (mode === 'client') {
-        return {
-            build: {
-                rollupOptions: {
-                    input: ['./app/client.ts'],
-                    output: {
-                        entryFileNames: 'static/client.js',
-                    },
-                },
-                outDir: './dist',
-                manifest: true,
-                emptyOutDir: false,
-            },
-            resolve: {
-                alias: {
-                    '@substrate-system/debug': '@substrate-system/debug/noop'
-                }
-            },
-        }
-    }
-
-    // Server build mode (default)
     return {
         plugins: [
-            honox({
-                devServer: {
-                    adapter,
-                },
-                client: {
-                    input: ['/app/client.ts'],
-                },
+            cloudflare({
+                configPath: './wrangler.jsonc',
             }),
         ],
         define: {
@@ -51,7 +22,9 @@ export default defineConfig(({ mode }) => {
             }
         },
         esbuild: {
-            logOverride: { 'this-is-undefined-in-esm': 'silent' }
+            logOverride: { 'this-is-undefined-in-esm': 'silent' },
+            jsxFactory: 'h',
+            jsxFragment: 'Fragment',
         },
         publicDir: '_public',
         css: {
