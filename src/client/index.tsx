@@ -1,80 +1,78 @@
-import { useEffect } from 'hono/jsx'
+import type { FC } from 'hono/jsx'
 import { render } from 'hono/jsx/dom'
+import { useComputed } from '@preact/signals'
 import Debug from '@substrate-system/debug'
-import Route from 'route-event'
-import { signal } from '@preact/signals'
-import { App } from '../shared/App.js'
-import type { AppState, SerializedState } from '../shared/state.js'
-import { deserializeState } from '../shared/state.js'
+import { State } from './state.js'
+import Router, { routes } from './routes/index.js'
+import './components/nav.css'
 import './style.css'
 
+const router = Router()
+const state = State()
 const debug = Debug('example')
 
-// Set debug logging in dev env
-if (import.meta.env.DEV) {
+// set debug logging in local env
+if (isDev()) {
     localStorage.setItem('DEBUG', 'example:*,example')
+    // @ts-expect-error DEV env
+    window.state = state
 } else {
     localStorage.removeItem('DEBUG')
     localStorage.removeItem('debug')
 }
 
-// Get initial state from server-rendered data
-const initialData = getInitialState()
+function Example () {
+    debug('rendering example...', state)
 
-// Create signals for reactive state
-const route = signal(initialData.route)
-const count = signal(initialData.count)
+    const match = useComputed(() => {
+        return router.match(state.route.value)
+    })
 
-const state: AppState = {
-    route,
-    count,
-}
-
-/**
- * Client-side wrapper that manages reactive state
- */
-function ClientApp () {
-    // Set up client-side routing
-    useEffect(() => {
-        const onRoute = Route()
-
-        onRoute((path: string, data: { popstate?: boolean; scrollX: number; scrollY: number }) => {
-            route.value = path
-            // Handle scroll state like a web browser
-            if (data.popstate) {
-                window.scrollTo(data.scrollX, data.scrollY)
-            } else {
-                window.scrollTo(0, 0)
-            }
-        })
-    }, [])
-
-    debug('rendering app...', state)
-
-    // @ts-expect-error DEV env
-    if (import.meta.env.DEV) window.state = state
-
-    return <App state={state} />
-}
-
-/**
- * Get initial state from server-rendered script tag
- */
-function getInitialState (): SerializedState {
-    const el = document.getElementById('__INITIAL_STATE__')
-    if (el?.textContent) {
-        try {
-            return deserializeState(el.textContent)
-        } catch {
-            // Fall back to defaults
-        }
+    if (!match.value || !match.value.action) {
+        return (
+            <div class="404">
+                <h1>404</h1>
+            </div>
+        )
     }
-    return {
-        route: location.pathname + location.search,
-        count: 0
-    }
+
+    const ChildNode = match.value.action(match.value, state.route.value)
+
+    return (
+        <main>
+            <header>
+                <h1>ABC</h1>
+                <Nav route={state.route.value} />
+            </header>
+
+            <ChildNode state={state} />
+        </main>
+    )
 }
 
-// Hydrate the server-rendered content
-const root = document.getElementById('root')!
-render(<ClientApp />, root)
+render(<Example />, document.getElementById('root')!)
+
+function isDev (): boolean {
+    return !!(import.meta.env.DEV || import.meta.env.MODE === 'staging')
+}
+
+interface NavProps {
+    route: string;
+}
+
+const Nav: FC<NavProps> = function Nav ({ route }) {
+    return (
+        <nav aria-label="Main navigation">
+            <ul>
+                {routes.map(r => (
+                    <li
+                        key={r.href}
+                        class={`nav${route === r.href ? ' active' : ''}`}
+                    >
+                        <a href={r.href}>{r.text}</a>
+                    </li>
+                ))}
+            </ul>
+        </nav>
+    )
+}

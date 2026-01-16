@@ -1,5 +1,6 @@
 import type { FC } from 'hono/jsx'
 import type { AppState } from '../state.js'
+import { State } from '../state.js'
 import { Button } from '../components/button.js'
 import './home.css'
 
@@ -10,12 +11,12 @@ interface HomeProps {
 export const HomeRoute: FC<HomeProps> = function HomeRoute ({ state }) {
     const plus = (ev: MouseEvent) => {
         ev.preventDefault()
-        state.count.value++
+        State.Increase(state)
     }
 
     const minus = (ev: MouseEvent) => {
         ev.preventDefault()
-        state.count.value--
+        State.Decrease(state)
     }
 
     return (
