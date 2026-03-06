@@ -9,17 +9,24 @@ export interface AppState {
     _setRoute: (path: string) => void;
 }
 
+export interface InitialClientState {
+    route?: string;
+    count?: number;
+}
+
 /**
  * Setup any state
  *   - routes
  */
-export function State (): AppState {
+export function State (initial: InitialClientState = {}): AppState {
     const onRoute = Route()
 
     const state: AppState = {
         _setRoute: onRoute.setRoute.bind(onRoute),
-        count: signal<number>(0),
-        route: signal<string>(location.pathname + location.search)
+        count: signal<number>(initial.count ?? 0),
+        route: signal<string>(
+            initial.route ?? (location.pathname + location.search)
+        )
     }
 
     debug('create state', state)

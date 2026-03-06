@@ -1,4 +1,4 @@
-import type { FC } from 'hono/jsx'
+import { useState, type FC } from 'hono/jsx'
 import type { AppState } from '../state.js'
 import { State } from '../state.js'
 import { Button } from '../components/button.js'
@@ -9,21 +9,25 @@ interface HomeProps {
 }
 
 export const HomeRoute: FC<HomeProps> = function HomeRoute ({ state }) {
+    const [count, setCount] = useState(state.count.value)
+
     const plus = (ev: MouseEvent) => {
         ev.preventDefault()
         State.Increase(state)
+        setCount(state.count.value)
     }
 
     const minus = (ev: MouseEvent) => {
         ev.preventDefault()
         State.Decrease(state)
+        setCount(state.count.value)
     }
 
     return (
         <section class="route home">
             <div>
                 <h2>counter</h2>
-                <output aria-live="polite">count: {state.count}</output>
+                <output aria-live="polite">count: {count}</output>
 
                 <ul class="count-controls">
                     <li>

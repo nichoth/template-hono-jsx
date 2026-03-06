@@ -1,78 +1,58 @@
-import type { FC } from 'hono/jsx'
-import { render } from 'hono/jsx/dom'
-import { useComputed } from '@preact/signals'
+import { hydrateRoot } from 'hono/jsx/dom/client'
 import Debug from '@substrate-system/debug'
-import { State } from './state.js'
-import Router, { routes } from './routes/index.js'
-import './components/nav.css'
+import { App } from '../shared/App.js'
+import { deserializeState, type SerializedState } from '../shared/state.js'
+import { State, type AppState } from './state.js'
 import './style.css'
 
-const router = Router()
-const state = State()
 const debug = Debug('example')
 
-// set debug logging in local env
-if (isDev()) {
-    localStorage.setItem('DEBUG', 'example:*,example')
-    // @ts-expect-error DEV env
-    window.state = state
-} else {
+mountClientApp()
+
+function isDev (): boolean {
+    const meta = import.meta as ImportMeta & {
+        env?: {
+            DEV?: boolean;
+            MODE?: string;
+        };
+    }
+
+    return !!(meta.env?.DEV || meta.env?.MODE === 'staging')
+}
+
+function setDebugState (state: AppState): void {
+    if (isDev()) {
+        localStorage.setItem('DEBUG', 'example:*,example')
+        ;(window as Window & { state?: AppState }).state = state
+        return
+    }
+
     localStorage.removeItem('DEBUG')
     localStorage.removeItem('debug')
 }
 
-function Example () {
-    debug('rendering example...', state)
+function readSerializedState (doc: Document): SerializedState | undefined {
+    const script = doc.getElementById('__INITIAL_STATE__')
 
-    const match = useComputed(() => {
-        return router.match(state.route.value)
-    })
+    if (!script?.textContent) return undefined
 
-    if (!match.value || !match.value.action) {
-        return (
-            <div class="404">
-                <h1>404</h1>
-            </div>
-        )
+    try {
+        return deserializeState(script.textContent)
+    } catch (_err) {
+        debug('unable to parse initial state', _err)
+        return undefined
     }
-
-    const ChildNode = match.value.action(match.value, state.route.value)
-
-    return (
-        <main>
-            <header>
-                <h1>ABC</h1>
-                <Nav route={state.route.value} />
-            </header>
-
-            <ChildNode state={state} />
-        </main>
-    )
 }
 
-render(<Example />, document.getElementById('root')!)
+export function mountClientApp (): AppState | undefined {
+    const root = document.getElementById('root')
+    if (!root) return undefined
 
-function isDev (): boolean {
-    return !!(import.meta.env.DEV || import.meta.env.MODE === 'staging')
-}
+    const initialState = readSerializedState(document)
+    const state = State(initialState)
 
-interface NavProps {
-    route: string;
-}
+    setDebugState(state)
+    hydrateRoot(root, <App state={state} />)
 
-const Nav: FC<NavProps> = function Nav ({ route }) {
-    return (
-        <nav aria-label="Main navigation">
-            <ul>
-                {routes.map(r => (
-                    <li
-                        key={r.href}
-                        class={`nav${route === r.href ? ' active' : ''}`}
-                    >
-                        <a href={r.href}>{r.text}</a>
-                    </li>
-                ))}
-            </ul>
-        </nav>
-    )
+    return state
 }
