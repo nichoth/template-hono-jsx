@@ -10,7 +10,7 @@ const debug = Debug('example:view:contact')
 export const ContactRoute: FC = function ContactRoute () {
     const isResolving = useSignal(false)
 
-    const submit = async (ev: SubmitEvent) => {
+    const submit = async (ev: Event) => {
         ev.preventDefault()
         debug('submit', ev)
         isResolving.value = true

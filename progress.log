@@ -1,0 +1,24 @@
+2026-03-05 TASK-001 Verify serverside rendering
+
+Changes:
+- Replaced the placeholder test with a Node SSR test that requests `/` from
+  the Hono app and asserts full HTML output plus serialized initial state.
+- Added `test:ssr` in `package.json` and pointed `npm test` to it so tests run
+  in Node.
+- Added `test/stubs/cloudflare-workers.ts` to alias `cloudflare:workers`
+  during Node bundling.
+- Updated `src/client/routes/contact.tsx` submit handler event type from
+  `SubmitEvent` to `Event` so project typecheck passes.
+- Marked `TASK-001` as `passes: true` in `specs/prd.json`.
+
+Patterns discovered:
+- Worker SSR tests in Node need an alias for `cloudflare:workers`.
+- CSS imports in server-shared JSX can be handled in Node test bundles with
+  `esbuild --loader:.css=text`.
+- `app.fetch(request, env)` works well for server-rendering verification with
+  lightweight Env stubs.
+
+Verification:
+- `npm run lint` passed.
+- `npm test` passed (8/8 assertions).
+- `npx tsc --noEmit` passed.
