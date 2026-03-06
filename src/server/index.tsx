@@ -103,140 +103,6 @@ app.use('*', async (ctx, next) => {
 })
 
 /**
- * Check authentication status.
- * Returns whether the user has a valid session.
- */
-app.get('/api/auth/status', async (ctx) => {
-    const session = ctx.get('session')
-    const activeDoId = session.get('active_do_id') as string|undefined
-
-    if (!activeDoId) {
-        return ctx.json({
-            authenticated: false,
-            registered: false
-        })
-    }
-
-    try {
-        const stub = ctx.env.MY_DO.getByName(activeDoId)
-        return ctx.newResponse(await stub.sayHello(), 200)
-    } catch (_err) {
-        const err = _err as Error
-        return ctx.newResponse(err.toString(), 500)
-    }
-})
-
-/**
- * Start OAuth login flow.
- * Creates a unique DO for this user session and initiates Bluesky OAuth.
- */
-app.post('/api/auth/login', async (ctx) => {
-    try {
-        const body = await ctx.req.json<{ handle:string }>()
-        let handle = body.handle?.trim()
-
-        if (!handle) {
-            return ctx.json({ error: 'Handle is required' }, 400)
-        }
-
-        // Normalize handle (remove @ prefix if present)
-        if (handle.startsWith('@')) {
-            handle = handle.slice(1)
-        }
-
-        // Generate a unique session ID for this auth attempt
-        // We use the handle as the DO name so users get the same DO on re-auth
-        const sessionId = handle.toLowerCase()
-
-        // Get or create a Durable Object for this user
-        const stub = ctx.env.MY_DO.getByName(sessionId)
-
-        // Start the OAuth flow - this returns the authorization URL
-        const authUrl = await stub.startAuth(handle)
-
-        // Store the pending session ID in cookie session
-        const session = ctx.get('session')
-        session.set('pending_do_id', sessionId)
-
-        return ctx.json({ success: true, authUrl })
-    } catch (_err) {
-        const err = _err as Error
-        console.error('OAuth login start failed:', err)
-        return ctx.newResponse('Failed to start authentication', 500)
-    }
-})
-
-/**
- * OAuth callback handler.
- * Processes the OAuth callback from Bluesky and establishes the session.
- */
-app.get('/api/auth/callback', async (ctx) => {
-    const session = ctx.get('session')
-    const pendingDoId = session.get('pending_do_id') as string | undefined
-
-    if (!pendingDoId) {
-        // Redirect to login with error
-        return ctx.redirect('/login?error=no_pending_session')
-    }
-
-    try {
-        // Get the OAuth callback parameters
-        const params:Record<string, string> = {}
-        const url = new URL(ctx.req.url)
-        url.searchParams.forEach((value, key) => {
-            params[key] = value
-        })
-
-        // Check for OAuth error in callback
-        if (params.error) {
-            console.error('OAuth error:', params.error, params.error_description)
-            session.forget('pending_do_id')
-            return ctx.redirect(`/login?error=${encodeURIComponent(params.error)}`)
-        }
-
-        // Get the DO and complete the OAuth flow
-        const stub = ctx.env.MY_DO.getByName(pendingDoId)
-        const result = await stub.handleCallback(params)
-
-        // Clear pending and set active session
-        session.forget('pending_do_id')
-        session.set('active_do_id', pendingDoId)
-        session.set('user_did', result.did)
-
-        // Redirect to home page
-        return ctx.redirect('/?auth=success')
-    } catch (err: any) {
-        console.error('OAuth callback failed:', err)
-        session.forget('pending_do_id')
-        return ctx.redirect(`/login?error=${encodeURIComponent(err.message || 'callback_failed')}`)
-    }
-})
-
-/**
- * Logout endpoint.
- * Clears the session and optionally revokes OAuth tokens.
- */
-app.post('/api/auth/logout', async (ctx) => {
-    const session = ctx.get('session')
-    const activeDoId = session.get('active_do_id') as string | undefined
-
-    if (activeDoId) {
-        try {
-            // Optionally revoke the OAuth session in the DO
-            // const stub = ctx.env.DRERINGS_DO.getByName(activeDoId)
-            // await stub.revokeSession()
-        } catch (err) {
-            console.error('Failed to revoke session:', err)
-        }
-    }
-
-    // Clear all session data by marking for deletion
-    session.deleteSession()
-
-    return ctx.json({ success: true })
-})
-
-/**
  * Write a new post.
  */
 app.post('/api/post', async (c) => {
@@ -278,56 +144,6 @@ app.post('/api/post', async (c) => {
 // Health check
 app.get('/health', (c) => {
     return c.json({ status: 'ok' })
-})
-
-// OAuth client metadata (required by AT Protocol OAuth)
-// Note: In production, the static file in _public/oauth/ takes precedence
-app.get('/oauth/client-metadata.json', (c) => {
-    const isDev = c.env.NODE_ENV === 'development'
-    return c.json({ isDev })
-})
-
-app.get('/api/feed/following', async (c) => {
-    const userDid = c.req.query('did')
-
-    // 'created_at' timestamp from the last post seen
-    const cursor = c.req.query('cursor')
-
-    if (!userDid) return c.json({ error: 'Missing DID' }, 400)
-
-    // Build the query dynamically based on whether we are loading the
-    // first page or "more"
-    let query = `
-        SELECT p.*, prof.handle, prof.display_name
-        FROM posts p
-        JOIN follows f ON p.author_did = f.subject_did
-        LEFT JOIN profiles prof ON p.author_did = prof.did
-        WHERE f.creator_did = ?
-    `
-
-    const params:string[] = [userDid]
-
-    if (cursor) {
-        query += ' AND p.created_at < ?'
-        params.push(cursor)
-    }
-
-    query += ' ORDER BY p.created_at DESC LIMIT 20'
-
-    try {
-        const { results } = await c.env.DB.prepare(query).bind(...params).all()
-
-        return c.json({
-            feed: results,
-            // Provide the cursor for the next request
-            nextCursor: results.length > 0 ?
-                results[results.length - 1].created_at :
-                null
-        })
-    } catch (err) {
-        console.error(err)
-        return c.json({ error: 'Database error' }, 500)
-    }
 })
 
 /**
@@ -372,17 +188,38 @@ app.get('/.well-known/did.json', async (ctx:Context) => {
     return ctx.json({})
 })
 
+// CSS dependencies shared across all routes
+const sharedCss = [
+    '/src/client/components/nav.css',
+]
+
+// Per-route CSS (each file @imports its own component CSS)
+const routeCss:Record<string, string[]> = {
+    '/': ['/src/client/routes/home.css'],
+    '/contact': ['/src/client/routes/contact.css'],
+}
+
+function cssLinks (pathname:string):string {
+    const files = [
+        ...sharedCss,
+        ...(routeCss[pathname] || []),
+    ]
+    return files
+        .map(f => `    <link rel="stylesheet" href="${f}">`)
+        .join('\n')
+}
+
 // Catch-all: serve static assets or SSR for page routes
 app.all('*', async (ctx) => {
     const url = new URL(ctx.req.url)
     const pathname = url.pathname
 
-    // In dev mode, let Vite handle its internal paths and source files
+    // In dev mode, delegate Vite-internal and source paths to the
+    // ASSETS binding, which is backed by Vite's dev server.
     if (pathname.startsWith('/@') ||
         pathname.startsWith('/node_modules/') ||
         pathname.startsWith('/src/')) {
-        // Return 404 so Vite dev server can handle these
-        return ctx.notFound()
+        return ctx.env.ASSETS.fetch(ctx.req.raw)
     }
 
     // Try to serve static assets first (files with extensions)
@@ -410,14 +247,18 @@ app.all('*', async (ctx) => {
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1">
     <title>App</title>
     <link rel="stylesheet" href="/src/client/style.css">
+${cssLinks(pathname)}
 </head>
 <body>
     <div id="root">${appHtml}</div>
-    <script id="__INITIAL_STATE__" type="application/json">${stateJson}</script>
-    <script type="module" src="/src/client/index.tsx"></script>
+    <script id="__INITIAL_STATE__"
+        type="application/json">${stateJson}</script>
+    <script type="module"
+        src="/src/client/index.tsx"></script>
 </body>
 </html>`
 

@@ -1,4 +1,4 @@
-@import url("../../node_modules/@substrate-system/css-normalize/dist/index.min.css");
+@import url("@substrate-system/css-normalize");
 
 :root {
     --focus-color: #00c8ff;
