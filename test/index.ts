@@ -32,7 +32,7 @@ test('server-side render returns full HTML for the home route', async t => {
 
 function readInitialState (html: string): InitialState | null {
     const stateMatch = html.match(
-        /<script id="__INITIAL_STATE__" type="application\/json">(.+)<\/script>/
+        /<script id="__INITIAL_STATE__"[\s\S]*?type="application\/json">(.+?)<\/script>/
     )
     if (!stateMatch) return null
     return JSON.parse(stateMatch[1]) as InitialState

@@ -188,12 +188,12 @@ app.get('/.well-known/did.json', async (ctx:Context) => {
     return ctx.json({})
 })
 
-// CSS dependencies shared across all routes
+// CSS dependencies shared across all routes (dev only)
 const sharedCss = [
     '/src/client/components/nav.css',
 ]
 
-// Per-route CSS (each file @imports its own component CSS)
+// Per-route CSS (dev only -- in production, Vite bundles all CSS)
 const routeCss:Record<string, string[]> = {
     '/': ['/src/client/routes/home.css'],
     '/contact': ['/src/client/routes/contact.css'],
@@ -209,23 +209,46 @@ function cssLinks (pathname:string):string {
         .join('\n')
 }
 
+/**
+ * In production, fetch the Vite-built index.html from ASSETS
+ * and cache it so we only read it once.
+ */
+let cachedShell:string | null = null
+
+async function getHtmlShell (
+    ctx:Context
+):Promise<string> {
+    if (cachedShell) return cachedShell
+
+    const res = await ctx.env.ASSETS.fetch(
+        new Request(new URL('/', ctx.req.url))
+    )
+    const text = await res.text()
+    cachedShell = text
+    return text
+}
+
 // Catch-all: serve static assets or SSR for page routes
 app.all('*', async (ctx) => {
     const url = new URL(ctx.req.url)
     const pathname = url.pathname
 
-    // In dev mode, delegate Vite-internal and source paths to the
-    // ASSETS binding, which is backed by Vite's dev server.
-    if (pathname.startsWith('/@') ||
-        pathname.startsWith('/node_modules/') ||
-        pathname.startsWith('/src/')) {
-        return ctx.env.ASSETS.fetch(ctx.req.raw)
+    // In dev mode, delegate Vite-internal and source paths
+    // to the ASSETS binding (backed by Vite's dev server).
+    if (import.meta.env.DEV) {
+        if (pathname.startsWith('/@') ||
+            pathname.startsWith('/node_modules/') ||
+            pathname.startsWith('/src/')) {
+            return ctx.env.ASSETS.fetch(ctx.req.raw)
+        }
     }
 
     // Try to serve static assets first (files with extensions)
     if (pathname.includes('.')) {
         try {
-            const response = await ctx.env.ASSETS.fetch(ctx.req.raw)
+            const response = await ctx.env.ASSETS.fetch(
+                ctx.req.raw
+            )
             if (response.status !== 404) {
                 return response
             }
@@ -237,13 +260,14 @@ app.all('*', async (ctx) => {
     // SSR: Render the app for page routes
     const route = pathname + url.search
     const initialState = createInitialState(route, 0)
-
-    // Render the App component to HTML string
     const appHtml = renderToString(<App state={initialState} />)
     const stateJson = serializeState(initialState)
 
-    // Build the full HTML page
-    const html = `<!doctype html>
+    let html:string
+
+    if (import.meta.env.DEV) {
+        // Dev: use source paths (Vite transforms on the fly)
+        html = `<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -261,6 +285,22 @@ ${cssLinks(pathname)}
         src="/src/client/index.tsx"></script>
 </body>
 </html>`
+    } else {
+        // Production: use Vite-built index.html with hashed
+        // asset paths, inject SSR content + state
+        const shell = await getHtmlShell(ctx)
+        html = shell
+            .replace(
+                '<div id="root"></div>',
+                `<div id="root">${appHtml}</div>`
+            )
+            .replace(
+                '</body>',
+                `    <script id="__INITIAL_STATE__"
+        type="application/json">${stateJson}</script>
+</body>`
+            )
+    }
 
     return ctx.html(html)
 })

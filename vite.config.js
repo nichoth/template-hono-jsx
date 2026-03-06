@@ -39,8 +39,7 @@ export default defineConfig(({ mode }) => {
             open: true,
         },
         build: {
-            cssMinify: 'lightningcss',
-            target: 'esnext',
+            cssMinify: 'esbuild',
             minify: mode === 'production',
             outDir: './dist',
             emptyOutDir: true,

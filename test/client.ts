@@ -3,9 +3,22 @@ import { Window } from 'happy-dom'
 import app from '../src/server/index.js'
 
 interface InitialState {
-    route: string;
-    count: number;
+    route:string;
+    count:number;
 }
+
+const htmlShell = `<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+    <title>App</title>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+</html>`
 
 test('client hydration preserves SSR markup and updates on client interactions',
     async t => {
@@ -79,7 +92,7 @@ function readInitialState (doc: Document): InitialState | null {
     return JSON.parse(script.textContent) as InitialState
 }
 
-function installBrowserEnvironment (html: string, url: string): () => void {
+function installBrowserEnvironment (html:string, url:string):()=>void {
     const browserWindow = new Window({ url })
     browserWindow.document.write(html)
     browserWindow.document.close()
@@ -238,7 +251,21 @@ function createTestEnv (): Env {
             }
         } as unknown as Env['MY_DO'],
         ASSETS: {
-            fetch: async () => new Response('Not Found', { status: 404 })
+            fetch: async (req:Request) => {
+                const url = new URL(
+                    typeof req === 'string' ? req : req.url
+                )
+                if (url.pathname === '/') {
+                    return new Response(htmlShell, {
+                        headers: {
+                            'content-type': 'text/html'
+                        }
+                    })
+                }
+                return new Response('Not Found', {
+                    status: 404
+                })
+            }
         } as unknown as Fetcher
     }
 }
