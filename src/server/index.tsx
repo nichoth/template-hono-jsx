@@ -15,10 +15,10 @@ export class MyDurableObject extends DurableObject<Env> {
      * Write a new post.
      */
     async post (
-        _text: string,
-        _buffer: ArrayBuffer,
-        _mimeType: string,
-        _alt: string
+        _text:string,
+        _buffer:ArrayBuffer,
+        _mimeType:string,
+        _alt:string
     ) {
         // DID from `handleCallback` step
         const did = await this.ctx.storage.get<string>('user_did')
@@ -376,6 +376,14 @@ app.get('/.well-known/did.json', async (ctx:Context) => {
 app.all('*', async (ctx) => {
     const url = new URL(ctx.req.url)
     const pathname = url.pathname
+
+    // In dev mode, let Vite handle its internal paths and source files
+    if (pathname.startsWith('/@') ||
+        pathname.startsWith('/node_modules/') ||
+        pathname.startsWith('/src/')) {
+        // Return 404 so Vite dev server can handle these
+        return ctx.notFound()
+    }
 
     // Try to serve static assets first (files with extensions)
     if (pathname.includes('.')) {
