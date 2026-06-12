@@ -18,69 +18,24 @@
 <!-- toc -->
 </details>
 
-## Install
+## Develop
 
-Installation instructions
+Start a localhost server.
 
 ```sh
-npm i -S @namespace/package
+npm start
 ```
 
-## Example
+## Test
 
-`usage instructions here`
+### All tests
 
-### JS
-```js
-import '@namespace/package/module'
-```
-
-
-## Modules
-
-This exposes ESM and common JS via [package.json `exports` field](https://nodejs.org/api/packages.html#exports).
-
-### ESM
-```js
-import '@namespace/package/module'
-```
-
-### Common JS
-```js
-require('@namespace/package/module')
-```
-
-## CSS
-
-### Import CSS
-
-```js
-import '@namespace/package-name/css'
-```
-
-Or minified:
-```js
-import '@namespace/package-name/css/min'
-```
-
-### Customize CSS via some variables
-
-```css
-component-name {
-    --example: pink;
-}
-```
-
-### pre-built JS
-This package exposes minified JS files too. Copy them to a location that is
-accessible to your web server, then link to them in HTML.
-
-#### copy
 ```sh
-cp ./node_modules/@namespace/package/dist/module.min.js ./public
+npm test
 ```
 
-#### HTML
-```html
-<script type="module" src="./module.min.js"></script>
+### Hydration
+
+```sh
+npm run test:hydration
 ```

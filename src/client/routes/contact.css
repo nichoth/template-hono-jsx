@@ -1,9 +1,11 @@
+@import url("../components/button.css");
+@import url("../components/input.css");
+
 .route.contact {
     & form {
-        max-width: 20rem;
         margin: 0 auto;
         border: 1px solid;
-        padding: 1rem;
+        padding: 2rem 1rem;
 
         & > div {
             &:last-child {

@@ -1,3 +1,5 @@
+@import url("../components/button.css");
+
 .route.home {
     & .count-controls {
         margin-top: 1rem;

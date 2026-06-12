@@ -1,6 +1,6 @@
 import type { FC } from 'hono/jsx'
-import type { Signal } from '@preact/signals'
 import type { AppState } from './state.js'
+import { useSignalValue } from './hooks.js'
 import Router, { routes } from '../client/routes/index.js'
 import '../client/components/nav.css'
 
@@ -11,7 +11,9 @@ interface AppProps {
 }
 
 export const App: FC<AppProps> = function App ({ state }) {
-    const match = router.match(state.route.value)
+    const route = useSignalValue(state.route)
+
+    const match = router.match(route)
 
     if (!match || !match.action) {
         return (
@@ -22,13 +24,13 @@ export const App: FC<AppProps> = function App ({ state }) {
         )
     }
 
-    const ChildNode = match.action(match, state.route.value)
+    const ChildNode = match.action(match, route)
 
     return (
         <>
             <header>
                 <h1>Example</h1>
-                <Nav route={state.route} />
+                <Nav route={route} />
             </header>
             <main>
                 <ChildNode state={state} />
@@ -38,7 +40,7 @@ export const App: FC<AppProps> = function App ({ state }) {
 }
 
 interface NavProps {
-    route: Signal<string>;
+    route: string;
 }
 
 function Nav ({ route }: NavProps) {
@@ -48,7 +50,7 @@ function Nav ({ route }: NavProps) {
                 {routes.map(r => (
                     <li
                         key={r.href}
-                        class={`nav${route.value === r.href ? ' active' : ''}`}
+                        class={`nav${route === r.href ? ' active' : ''}`}
                     >
                         <a href={r.href}>{r.text}</a>
                     </li>

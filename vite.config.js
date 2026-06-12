@@ -34,13 +34,12 @@ export default defineConfig(({ mode }) => {
             },
         },
         server: {
-            port: 8888,
+            port: 2222,
             host: true,
             open: true,
         },
         build: {
-            cssMinify: 'lightningcss',
-            target: 'esnext',
+            cssMinify: 'esbuild',
             minify: mode === 'production',
             outDir: './dist',
             emptyOutDir: true,

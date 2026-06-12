@@ -1,14 +1,17 @@
 import type { FC } from 'hono/jsx'
 import type { AppState } from '../state.js'
 import { State } from '../state.js'
+import { useSignalValue } from '../../shared/hooks.js'
 import { Button } from '../components/button.js'
 import './home.css'
 
 interface HomeProps {
-    state: AppState;
+    state:AppState;
 }
 
 export const HomeRoute: FC<HomeProps> = function HomeRoute ({ state }) {
+    const count = useSignalValue(state.count)
+
     const plus = (ev: MouseEvent) => {
         ev.preventDefault()
         State.Increase(state)
@@ -23,7 +26,7 @@ export const HomeRoute: FC<HomeProps> = function HomeRoute ({ state }) {
         <section class="route home">
             <div>
                 <h2>counter</h2>
-                <output aria-live="polite">count: {state.count}</output>
+                <output aria-live="polite">count: {count}</output>
 
                 <ul class="count-controls">
                     <li>
