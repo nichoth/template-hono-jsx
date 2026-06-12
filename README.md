@@ -1,8 +1,25 @@
 # template hono jsx
 
-A template for projects using [Hono and Hono JSX](https://hono.dev/docs/guides/jsx).
+A template for projects using
+[Hono as server](https://hono.dev/), and Hono JSX for
+[creating HTML](https://hono.dev/docs/guides/jsx).
 
-This 
+This uses `hono/jsx` to hydrate the client-side app, and `hono/jsx/dom/server`
+to serialize the app to an HTML string on the server.
+
+The initial request response includes a serialized state object, 
+`#__INITIAL_STATE__`. The client uses this to
+[hydrate](https://jsr.io/@hono/hono/doc/jsx/dom/client/~/hydrateRoot)
+its in-memory state.
+
+After the initial page load, every subsequent request should only
+be calls that you explicitly make, meaning this is a server-side rendered
+[single-page application](https://developer.mozilla.org/en-US/docs/Glossary/SPA).
+
+---
+
+Use the `template` button in Github's GUI.
+
 
 <details><summary><h2>Contents</h2></summary>
 
@@ -19,12 +36,14 @@ This
 
 </details>
 
+
 ## Vite
 
 ### CSS
 
-* CSS transformation still uses `lightningcss` (via css.transformer),
+* CSS transformation uses `lightningcss` (via css.transformer),
   only minification uses `esbuild`.
+
 
 ## Test
 
@@ -33,45 +52,3 @@ This
 ```sh
 npm run test:hydration
 ```
-
-
---------------------------------------------------------------------
-
-
-## [Ralph](https://ghuntley.com/ralph/)
-
-Need to do these things:
-
-1. Define requirements -- see [`./specs/prd.json`](./specs/prd.json).
-2. Create a `PROMPT.md` file &mdash; can copy + paste [PROMPT.md](./PROMPT.md).
-   The `PROMPT.md` file defines a stopping condition that will be printed on
-   success. The stop text is watched for the the [./ralph.sh script](./ralph.sh).
-
-Start a Ralph loop of 5 iterations:
-
-```sh
-./ralph.sh 5
-```
-
-or
-
-```sh
-while :; do cat prompt.md | claude -p --dangerously-skip-permissions; done
-```
-
-* See [the blog post](https://ghuntley.com/loop/).
-* [example repo](https://github.com/repomirrorhq/repomirror/blob/main/repomirror.md)
-* See [the video where he talks about "the conversation"](https://youtu.be/4Nna09dG_c0?t=530),
-  which is how you create the spec.
-* [the part in the video where he demos the conversation](https://youtu.be/4Nna09dG_c0?t=721)
-* ["so how do you build specs? It's really simple](https://youtu.be/4Nna09dG_c0?t=827)
-  > Lets have a discussion, and you can interview me.
-* ["It's a dance. This is how you build your specifications"](https://youtu.be/4Nna09dG_c0?t=1117)
-
-### do one thing per loop
-
-It's about keeping the context window small.
-
-### Ralph's tools
-
-Record the tasks in [spec/prd.md](./specs/prd.json).

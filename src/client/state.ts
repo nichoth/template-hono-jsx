@@ -4,24 +4,24 @@ import Debug from '@substrate-system/debug'
 const debug = Debug('example:state')
 
 export interface AppState {
-    route: Signal<string>;
-    count: Signal<number>;
-    _setRoute: (path: string) => void;
+    route:Signal<string>;
+    count:Signal<number>;
+    _setRoute:(path: string) => void;
 }
 
 export interface InitialClientState {
-    route?: string;
-    count?: number;
+    route?:string;
+    count?:number;
 }
 
 /**
  * Setup any state
  *   - routes
  */
-export function State (initial: InitialClientState = {}): AppState {
+export function State (initial:InitialClientState = {}):AppState {
     const onRoute = Route()
 
-    const state: AppState = {
+    const state:AppState = {
         _setRoute: onRoute.setRoute.bind(onRoute),
         count: signal<number>(initial.count ?? 0),
         route: signal<string>(
@@ -34,7 +34,7 @@ export function State (initial: InitialClientState = {}): AppState {
     /**
      * set the app state to match the browser URL
      */
-    onRoute((path: string, data) => {
+    onRoute((path:string, data) => {
         state.route.value = path
         // handle scroll state like a web browser
         // (restore scroll position on back/forward)
@@ -48,10 +48,10 @@ export function State (initial: InitialClientState = {}): AppState {
     return state
 }
 
-State.Increase = function (state: AppState) {
+State.Increase = function (state:AppState) {
     state.count.value++
 }
 
-State.Decrease = function (state: AppState) {
+State.Decrease = function (state:AppState) {
     state.count.value--
 }

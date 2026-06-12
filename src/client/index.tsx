@@ -2,49 +2,25 @@ import { hydrateRoot } from 'hono/jsx/dom/client'
 import Debug from '@substrate-system/debug'
 import { App } from '../shared/App.js'
 import { deserializeState, type SerializedState } from '../shared/state.js'
-import { State, type AppState } from './state.js'
+import { State } from './state.js'
 import './style.css'
-
 const debug = Debug('example')
 
-mountClientApp()
-
-export function mountClientApp (): AppState | undefined {
-    const root = document.getElementById('root')
-    if (!root) return undefined
-
-    const initialState = readSerializedState(document)
-    const state = State(initialState)
-
-    setDebugState(state)
-    hydrateRoot(root, <App state={state} />)
-
-    return state
-}
-
-function isDev (): boolean {
-    const meta = import.meta as ImportMeta & {
-        env?: {
-            DEV?: boolean;
-            MODE?: string;
-        };
-    }
-
-    return !!(meta.env?.DEV || meta.env?.MODE === 'staging')
-}
-
-function setDebugState (state: AppState): void {
-    if (isDev()) {
-        localStorage.setItem('DEBUG', 'example:*,example')
-        ;(window as Window & { state?: AppState }).state = state
-        return
-    }
-
+const initialState = readSerializedState(document)
+const state = State(initialState)
+if (import.meta.env.DEV) {
+    localStorage.setItem('DEBUG', 'example,example:*')
+    // @ts-expect-error dev
+    window.state = state
+} else {
     localStorage.removeItem('DEBUG')
-    localStorage.removeItem('debug')
 }
 
-function readSerializedState (doc: Document): SerializedState | undefined {
+const root = document.getElementById('root')
+
+hydrateRoot(root!, <App state={state} />)
+
+function readSerializedState (doc:Document):SerializedState|undefined {
     const script = doc.getElementById('__INITIAL_STATE__')
 
     if (!script?.textContent) return undefined

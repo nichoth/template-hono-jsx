@@ -4,7 +4,7 @@ import { cors } from 'hono/cors'
 import { Hono, type Context } from 'hono'
 import { renderToString } from 'hono/jsx/dom/server'
 import { App } from '../shared/App.js'
-import { createInitialState, serializeState } from '../shared/state.js'
+import { createInitialState } from '../shared/state.js'
 
 /**
  * A CF durable object.
@@ -261,7 +261,7 @@ app.all('*', async (ctx) => {
     const route = pathname + url.search
     const initialState = createInitialState(route, 0)
     const appHtml = renderToString(<App state={initialState} />)
-    const stateJson = serializeState(initialState)
+    const stateJson = JSON.stringify(initialState)
 
     let html:string
 
@@ -279,10 +279,10 @@ ${cssLinks(pathname)}
 </head>
 <body>
     <div id="root">${appHtml}</div>
-    <script id="__INITIAL_STATE__"
-        type="application/json">${stateJson}</script>
-    <script type="module"
-        src="/src/client/index.tsx"></script>
+    <script id="__INITIAL_STATE__" type="application/json">
+        ${stateJson}
+    </script>
+    <script type="module" src="/src/client/index.tsx"></script>
 </body>
 </html>`
     } else {

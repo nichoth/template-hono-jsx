@@ -20,11 +20,19 @@
 
 ## Develop
 
+Start a localhost server.
+
 ```sh
 npm start
 ```
 
 ## Test
+
+### All tests
+
+```sh
+npm test
+```
 
 ### Hydration
 
