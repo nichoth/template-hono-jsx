@@ -4,7 +4,6 @@
     "module": "esnext",
     "target": "ES2022",
     "moduleResolution": "Bundler",
-    "esModuleInterop": false,
     "lib": ["ES2023", "DOM", "WebWorker"],
     "types": ["vite/client", "@cloudflare/workers-types"],
     "allowJs": false,

@@ -30,6 +30,26 @@ test('server-side render returns full HTML for the home route', async t => {
         'initial state matches home route defaults')
 })
 
+test('server-side render returns full HTML for the contact route', async t => {
+    const response = await app.fetch(
+        new Request('http://localhost/contact'),
+        createTestEnv()
+    )
+
+    t.equal(response.status, 200, 'returns 200 status')
+
+    const html = await response.text()
+    t.ok(html.startsWith('<!doctype html>'), 'returns an HTML document')
+    t.ok(/<form[\s>]/.test(html), 'renders the contact form')
+
+    const state = readInitialState(html)
+    t.ok(state, 'embeds serialized initial state')
+
+    if (!state) return
+    t.equal(state.route, '/contact',
+        'initial state matches the contact route')
+})
+
 function readInitialState (html: string): InitialState | null {
     const stateMatch = html.match(
         /<script id="__INITIAL_STATE__"[\s\S]*?type="application\/json">(.+?)<\/script>/

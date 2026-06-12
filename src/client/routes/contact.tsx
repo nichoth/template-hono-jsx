@@ -1,6 +1,6 @@
 import type { FC } from 'hono/jsx'
-import { useSignal } from '@preact/signals'
 import Debug from '@substrate-system/debug'
+import { useSignal } from '../../shared/hooks.js'
 import { Button } from '../components/button.js'
 import { Input } from '../components/input.js'
 import './contact.css'

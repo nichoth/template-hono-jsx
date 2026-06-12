@@ -23,7 +23,7 @@ const htmlShell = `<!doctype html>
 test('client hydration preserves SSR markup and updates on client interactions',
     async t => {
         const html = await renderHtmlForRoute('/')
-        installBrowserEnvironment(html, 'http://localhost/contact')
+        installBrowserEnvironment(html, 'http://localhost/')
 
         const root = document.getElementById('root')
         if (!root) throw new Error('expected #root element from SSR HTML')
@@ -42,7 +42,7 @@ test('client hydration preserves SSR markup and updates on client interactions',
         t.equal(root.innerHTML, beforeHtml,
             'initial client boot keeps SSR markup unchanged')
         t.ok(root.textContent?.includes('counter'),
-            'client starts from server-provided state, not current URL')
+            'hydration preserves the server-rendered route')
 
         const plusButton = Array.from(document.querySelectorAll('button.btn'))
             .find(btn => btn.textContent?.trim() === 'plus')
@@ -70,6 +70,32 @@ test('client hydration preserves SSR markup and updates on client interactions',
         t.ok(countOutput.textContent?.includes('count: 1'),
             'client-side state updates re-render the route')
     })
+
+test('client-side navigation re-renders the matched route', async t => {
+    // continues from the hydrated app set up in the previous test
+    const root = document.getElementById('root')
+    if (!root) throw new Error('expected #root element')
+
+    const contactLink = document.querySelector('a[href="/contact"]')
+    if (!(contactLink instanceof HTMLAnchorElement)) {
+        throw new Error('expected contact nav link')
+    }
+
+    contactLink.dispatchEvent(new window.MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+    }))
+
+    await waitFor(() => !!root.querySelector('form'),
+        'contact route should render after clicking its nav link')
+
+    t.ok(root.querySelector('form'),
+        'clicking a nav link renders the new route')
+    t.ok(!root.querySelector('output'),
+        'previous route content is replaced')
+    t.equal(location.pathname, '/contact',
+        'browser URL matches the new route')
+})
 
 async function renderHtmlForRoute (route: string): Promise<string> {
     const response = await app.fetch(

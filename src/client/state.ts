@@ -1,4 +1,4 @@
-import { type Signal, signal } from '@preact/signals'
+import { type Signal, signal } from '@preact/signals-core'
 import Route from 'route-event'
 import Debug from '@substrate-system/debug'
 const debug = Debug('example:state')

@@ -1,26 +1,25 @@
-import { useState, type FC } from 'hono/jsx'
+import type { FC } from 'hono/jsx'
 import type { AppState } from '../state.js'
 import { State } from '../state.js'
+import { useSignalValue } from '../../shared/hooks.js'
 import { Button } from '../components/button.js'
 import './home.css'
 
 interface HomeProps {
-    state: AppState;
+    state:AppState;
 }
 
 export const HomeRoute: FC<HomeProps> = function HomeRoute ({ state }) {
-    const [count, setCount] = useState(state.count.value)
+    const count = useSignalValue(state.count)
 
     const plus = (ev: MouseEvent) => {
         ev.preventDefault()
         State.Increase(state)
-        setCount(state.count.value)
     }
 
     const minus = (ev: MouseEvent) => {
         ev.preventDefault()
         State.Decrease(state)
-        setCount(state.count.value)
     }
 
     return (

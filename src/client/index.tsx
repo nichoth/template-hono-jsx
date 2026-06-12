@@ -9,6 +9,19 @@ const debug = Debug('example')
 
 mountClientApp()
 
+export function mountClientApp (): AppState | undefined {
+    const root = document.getElementById('root')
+    if (!root) return undefined
+
+    const initialState = readSerializedState(document)
+    const state = State(initialState)
+
+    setDebugState(state)
+    hydrateRoot(root, <App state={state} />)
+
+    return state
+}
+
 function isDev (): boolean {
     const meta = import.meta as ImportMeta & {
         env?: {
@@ -42,17 +55,4 @@ function readSerializedState (doc: Document): SerializedState | undefined {
         debug('unable to parse initial state', _err)
         return undefined
     }
-}
-
-export function mountClientApp (): AppState | undefined {
-    const root = document.getElementById('root')
-    if (!root) return undefined
-
-    const initialState = readSerializedState(document)
-    const state = State(initialState)
-
-    setDebugState(state)
-    hydrateRoot(root, <App state={state} />)
-
-    return state
 }
