@@ -118,7 +118,7 @@ function readInitialState (doc: Document): InitialState | null {
     return JSON.parse(script.textContent) as InitialState
 }
 
-function installBrowserEnvironment (html:string, url:string):()=>void {
+function installBrowserEnvironment (html:string, url:string):() => void {
     const browserWindow = new Window({ url })
     browserWindow.document.write(html)
     browserWindow.document.close()

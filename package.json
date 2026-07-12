@@ -23,7 +23,7 @@
     }
   },
   "scripts": {
-    "lint": "eslint \"./**/*.{ts,tsx,js}\"",
+    "lint": "eslint .",
     "test": "npm run test:ssr && npm run test:client",
     "test:ssr": "esbuild ./test/index.ts --bundle --platform=node --format=esm --loader:.css=text --log-level=error --alias:cloudflare:workers=./test/stubs/cloudflare-workers.ts --define:import.meta.env.DEV=true --define:import.meta.env.MODE='\"development\"' | node --input-type=module | tap-spec",
     "test:client": "esbuild ./test/client.ts --bundle --packages=external --platform=node --format=esm --loader:.css=text --log-level=error --alias:cloudflare:workers=./test/stubs/cloudflare-workers.ts --define:import.meta.env.DEV=false --define:import.meta.env.MODE='\"test\"' | node --input-type=module | tap-spec",
@@ -53,30 +53,27 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.17.1",
-    "@cloudflare/workers-types": "^4.20260111.0",
+    "@cloudflare/vite-plugin": "^1.44.0",
     "@substrate-system/debug": "^0.9.24",
     "@substrate-system/tapout": "^0.0.33",
     "@substrate-system/tapzero": "^0.10.15",
     "@substrate-system/wait-on": "^8.0.3",
     "@types/node": "^25.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
     "auto-changelog": "^2.4.0",
     "browserslist": "^4.28.1",
     "esbuild": "^0.27.0",
-    "eslint": "^8.57.0",
-    "eslint-config-standard": "^17.1.0",
+    "eslint": "^10.7.0",
     "happy-dom": "^20.8.3",
     "htm": "^3.1.1",
     "lightningcss": "^1.30.2",
     "markdown-toc": "^1.2.0",
+    "newneostandard": "^0.14.1",
     "postcss-nesting": "^13.0.2",
     "tap-spec": "^5.0.0",
     "typedoc": "^0.28.9",
     "typescript": "^5.9.2",
     "vite": "^7.0.6",
-    "wrangler": "^4.54.0"
+    "wrangler": "^4.110.0"
   },
   "author": "nichoth <nichoth@nichoth.com> (https://nichoth.com)",
   "license": "SEE LICENSE IN LICENSE"
